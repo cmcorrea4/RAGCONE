@@ -3,7 +3,7 @@ from pinecone import Pinecone
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
-from langchain_pinecone import PineconeVectorStore
+from langchain_community.vectorstores.pinecone import Pinecone as LangchainPinecone
 from langchain.callbacks import get_openai_callback
 from gtts import gTTS
 import base64
@@ -178,14 +178,15 @@ def query_pinecone(query_text, namespace, k=5):
             openai_api_key=openai_api_key
         )
         
-        # Inicializar Pinecone y crear vector store
+        # Inicializar Pinecone
         pc = Pinecone(api_key=pinecone_api_key)
         index = pc.Index(selected_index)
         
-        # Crear vector store usando la nueva importación
-        vectorstore = PineconeVectorStore(
+        # Crear vector store
+        vectorstore = LangchainPinecone(
             index=index,
             embedding=embedding_model,
+            text_key="text",
             namespace=namespace
         )
         

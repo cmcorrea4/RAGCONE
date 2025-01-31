@@ -182,7 +182,7 @@ def query_pinecone(query_text, namespace, k=5):
         pc = Pinecone(api_key=pinecone_api_key)
         index = pc.Index(selected_index)
         
-        # Crear vector store
+        # Crear vector store usando la nueva importación
         vectorstore = PineconeVectorStore(
             index=index,
             embedding=embedding_model,
@@ -266,7 +266,7 @@ if openai_api_key and pinecone_api_key and selected_index:
                     st.markdown("### 📚 Fuentes Consultadas:")
                     
                     for i, match in enumerate(results.matches, 1):
-                        score = match.score
+                        score = match.get('score', 0)
                         similarity = round((1 - (1 - score)) * 100, 2) if score else 0
                         
                         with st.expander(f"📍 Fuente {i} - Similitud: {similarity}%"):

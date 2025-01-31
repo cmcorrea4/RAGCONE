@@ -12,7 +12,7 @@ openai==1.11.1
 gTTS==2.5.0
 tiktoken==0.5.2
 
-# Dependencias adicionales necesarias
+# Dependencias adicionales
 python-dotenv==1.0.0
 typing-extensions==4.12.2
 typing-inspect==0.9.0

@@ -1,15 +1,16 @@
 import streamlit as st
 from pinecone import Pinecone
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings  # Actualizado
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
-from langchain_community.vectorstores.pinecone import Pinecone as LangchainPinecone
-from langchain.callbacks import get_openai_callback
+from langchain_community.vectorstores.pinecone import Pinecone as LangchainPinecone  # Actualizado
+from langchain_community.callbacks import get_openai_callback  # Actualizado
 from gtts import gTTS
 import base64
 import os
 from tempfile import NamedTemporaryFile
 import re
+
 
 # Configuración de la página
 st.set_page_config(page_title="Consulta de Base de Datos Vectorial", layout="wide")

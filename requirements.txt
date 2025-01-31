@@ -3,7 +3,7 @@ streamlit==1.31.0
 pinecone-client==3.0.1
 
 # LangChain y sus dependencias
-langchain==0.1.5
+langchain-core==0.1.4
 langchain-community==0.0.17
 langchain-openai==0.0.3
 openai==1.11.1
@@ -17,8 +17,3 @@ python-dotenv==1.0.0
 typing-extensions==4.12.2
 typing-inspect==0.9.0
 pydantic==2.5.2
-aiohttp==3.9.1
-requests==2.31.0
-urllib3==2.1.0
-numpy==1.26.3
-pandas==2.1.4

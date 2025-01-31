@@ -1,20 +1,25 @@
 import streamlit as st
 from pinecone import Pinecone
-from langchain_openai import OpenAIEmbeddings  # Actualizado
+from langchain_openai import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
-from langchain.chains import RetrievalQA
-from langchain_community.vectorstores.pinecone import Pinecone as LangchainPinecone  # Actualizado
-from langchain_community.callbacks import get_openai_callback  # Actualizado
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_community.vectorstores.pinecone import Pinecone as LangchainPinecone
+from langchain_community.callbacks import get_openai_callback
+from langchain_core.runnables import RunnablePassthrough
 from gtts import gTTS
 import base64
 import os
 from tempfile import NamedTemporaryFile
 import re
 
-
 # Configuración de la página
 st.set_page_config(page_title="Consulta de Base de Datos Vectorial", layout="wide")
 st.title("🔍 Sistema de Consulta Inteligente con Pinecone")
+
+# Función para formatear documentos
+def _format_docs(docs):
+    return "\n\n".join(doc.page_content for doc in docs)
 
 # Función para obtener índices de Pinecone
 def get_pinecone_indexes(api_key):
@@ -191,22 +196,33 @@ def query_pinecone(query_text, namespace, k=5):
             namespace=namespace
         )
         
-        # Crear cadena de QA con recuperación
-        qa_chain = RetrievalQA.from_chain_type(
-            llm=llm,
-            chain_type="stuff",
-            retriever=vectorstore.as_retriever(search_kwargs={"k": k}),
-            return_source_documents=True
+        # Crear el template para el prompt
+        template = """Responde la siguiente pregunta usando solo la información proporcionada en el contexto.
+        Si no puedes encontrar la respuesta en el contexto, di "No puedo responder esta pregunta con la información proporcionada."
+        
+        Contexto: {context}
+        Pregunta: {question}
+        
+        Respuesta:"""
+        
+        prompt = ChatPromptTemplate.from_template(template)
+        
+        # Crear la cadena de recuperación
+        retriever = vectorstore.as_retriever(search_kwargs={"k": k})
+        
+        # Crear la cadena completa
+        chain = (
+            {"context": retriever | _format_docs, "question": RunnablePassthrough()}
+            | prompt
+            | llm
+            | StrOutputParser()
         )
         
-        # Obtener respuesta de la cadena
+        # Obtener respuesta y documentos
         with get_openai_callback() as cb:
-            response = qa_chain.invoke({"query": query_text})
+            answer = chain.invoke(query_text)
+            source_docs = retriever.get_relevant_documents(query_text)
             print(f"Uso de tokens: {cb}")
-        
-        # Extraer respuesta y documentos fuente
-        answer = response["result"]
-        source_docs = response["source_documents"]
         
         # Convertir documentos fuente al formato de resultados
         results = {
